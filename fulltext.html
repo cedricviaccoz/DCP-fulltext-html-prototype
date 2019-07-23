@@ -1,11 +1,11 @@
-<div class="no-content"> This document currently holds no OCR text to be downloaded. 
+<div id="no-content"> This document currently holds no OCR text to be downloaded. 
 </div>
 
-<div class="progress-bar">
+<div id="progress-bar">
 	TODO
 </div>
 
-<div class="fulltext">
+<div id="fulltext-zone">
 
 </div>
 
@@ -13,10 +13,11 @@
 	const drs_id = 2585728;
 	const hasocr = false;
 
-	if(hasocr){
-		document.getElementsByClassName('no-content')[0];.style.display = "none";
-	}else{
-		document.getElementsByClassName('no-content')[0].style.display = "block";
-	}
 	//const drs_id = <%document[:drs_id]%>
+
+	if(hasocr){
+		document.getElementById('no-content').style.display = "none";
+	}else{
+		document.getElementsById('no-content').style.display = "block";
+	}
 </script>
