@@ -13,6 +13,7 @@
 <script type="text/javascript">
 	const drs_id = 2585728;
 	const hasocr = true;
+	const pageIncrementValue = 5;
 
 	//const drs_id = <%document[:drs_id]%>
 
@@ -21,12 +22,27 @@
 		async function update(){
 			document.getElementById('no-content').style.display = "none";
 			let pageNumber = retrieveNumberOfPages(drs_id);
-			for(let i = 0; i<=pageNumber; ++i){
+			let pageAccumulator = ''
+			let pageAccNumber = 0
+			for(let i = 0; i<pageNumber; ++i){
 				//sleeping to simulate API call taking time to get resolved.
 				await sleep(100);
-				let pageOCR = (String(drs_id)+" : "+String(i)+"; <br></br>");
-				updateBar(i, pageNumber);
-				updateTextZone(pageOCR);
+				let pageOCR = (String(drs_id)+" : "+String(i)+";");
+				pageAccumulator += pageOCR;
+				pageAccNumber++;
+				if(pageAccNumber>=pageIncrementValue){
+					updateTextZone(pageAccumulator, i);
+					updateBar(i+1, pageNumber);
+					pageAccumulator = '';
+					pageAccNumber = 0;
+				} else if(i == pageNumber - 1){
+					/*as we update the text zone only by increment of 'pageIncrementValue', 
+					  we need to treat the case the number of pages is not a multilpe of 
+					  the pageIncrementValue and display the last elements left in the
+					  string accumulator*/
+					updateTextZone(pageAccumulator, i);
+					updateBar(i+1, pageNumber);
+				}
 			}
 			document.getElementById('progress').style.display = "none";	
 		}
@@ -36,13 +52,17 @@
 		document.getElementById('progress').style.display = "none";
 	}
 
-	function updateTextZone(textToAppend){
+	function updateTextZone(textToAppend, currIndex){
 		let textZone = document.getElementById('fulltext-zone');
-		textZone.innerHTML += textToAppend;
+		let newDiv = document.createElement('div');
+		newDiv.setAttribute("id", ("fulltext-part-"+String(currIndex-pageIncrementValue)+"-to-"+String(currIndex)));
+		newDiv.innerText += textToAppend;
+		textZone.appendChild(newDiv);
 	}
 
 
 	function retrieveNumberOfPages(drs_id){
+		//TODO: insert the actual API call to retrieve the page number from the iiif manifest.
 		return 120;
 	}
 
