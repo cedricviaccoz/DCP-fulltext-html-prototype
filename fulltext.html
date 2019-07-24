@@ -17,13 +17,34 @@
 	//const drs_id = <%document[:drs_id]%>
 
 	if(hasocr){
-		document.getElementById('no-content').style.display = "none";
-		progressBarDemo();
+		// async and await and sleep are all used to simulate an API request taking time to get resolved.
+		async function update(){
+			document.getElementById('no-content').style.display = "none";
+			let pageNumber = retrieveNumberOfPages(drs_id);
+			for(let i = 0; i<=pageNumber; ++i){
+				//sleeping to simulate API call taking time to get resolved.
+				await sleep(100);
+				let pageOCR = (String(drs_id)+" : "+String(i)+"; <br></br>");
+				updateBar(i, pageNumber);
+				updateTextZone(pageOCR);
+			}
+			document.getElementById('progress').style.display = "none";	
+		}
+		update();
 	}else{
 		document.getElementById('no-content').style.display = "block";
 		document.getElementById('progress').style.display = "none";
 	}
 
+	function updateTextZone(textToAppend){
+		let textZone = document.getElementById('fulltext-zone');
+		textZone.innerHTML += textToAppend;
+	}
+
+
+	function retrieveNumberOfPages(drs_id){
+		return 120;
+	}
 
 
 	function updateBar(currentPage, totalPage) {
@@ -35,18 +56,11 @@
 	}
 
 
-	// both functions below only serve as a way to test the progress bar before 
-	// an actual text updating module is plugged in. 
+	//TODO: remove
 	function sleep(ms) {
 	  return new Promise(resolve => setTimeout(resolve, ms));
 	}
 
-	async function progressBarDemo(){
-		for(let i=0; i<=100; ++i){
-			await sleep(100);
-			updateBar(i, 100);
-		}
-	}
 
 </script>
 
