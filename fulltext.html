@@ -1,22 +1,85 @@
-<div class="no-content"> This document currently holds no OCR text to be downloaded. 
-</div>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
 
-<div class="progress-bar">
-	TODO
-</div>
+    <title>Download full text</title>
 
-<div class="fulltext">
+  </head>
 
-</div>
+  <body>
 
-<script type="text/javascript">
-	const drs_id = 2585728;
-	const hasocr = false;
+		<div class="no-content">
+			This document currently holds no OCR text to be downloaded.
+		</div>
 
-	if(hasocr){
-		document.getElementsByClassName('no-content')[0];.style.display = "none";
-	}else{
-		document.getElementsByClassName('no-content')[0].style.display = "block";
-	}
-	//const drs_id = <%document[:drs_id]%>
-</script>
+		<div class="progress-bar">
+			progress bar TODO
+		</div>
+
+		<div class="full-text">
+			full text TODO
+		</div>
+
+		<script type="text/javascript">
+			const drs_id = 6622876;
+			const hasocr = false;
+
+			const full_text = document.querySelector('.full-text');
+
+			if (hasocr) {
+				document.getElementsByClassName('no-content')[0].style.display = "none";
+			} else {
+				document.getElementsByClassName('no-content')[0].style.display = "block";
+			};
+			//const drs_id = <%document[:drs_id]%>
+
+			function request_from_iiif_proxy(drs_id) {
+				var request = new XMLHttpRequest();
+				request.open("GET", "https://iiif.lib.harvard.edu/proxy/get/" + drs_id);
+				request.responsetype = 'document';
+				request.send();
+				// parser = new DOMParser();
+				// xmlDoc = parser.parseFromString(request.response,"text/xml");
+				return request.response;
+			};
+			// page_count = request_from_iiif_proxy(drs_id['page']['lastpage'])
+			// var request_result = request_from_iiif_proxy(drs_id);
+
+			// full_text.textContent = request_result
+
+
+			function request_txts_from_fds() {
+				var request = new XMLHttpRequest();
+				request.open("Get", "http://fds.lib.harvard.edu/fds/deliver/6098386?n=1&callback=?");
+				request.send();
+				return request;
+			};
+
+			var resp = request_txts_from_fds();
+			// resp = resp.toString()
+
+			full_text.textContent = resp.responseText;
+
+			// document.write(6,' ...writing 6');
+
+			function trimm(str, characters) {
+        var c_array = characters.split('');
+        var result  = '';
+
+        for (var i=0; i < characters.length; i++)
+          result += '\\' + c_array[i];
+
+        return str.replace(new RegExp('^[' + result + ']+|['+ result +']+$', 'g'), '');
+      }
+
+      // var text_string = "  (P<page><displaylabel>Pro;gress</displaylabel></page>);  ";
+      // text_string = trimm(request_result,"\n ;()");
+
+			// document.write(text_string);
+
+		</script>
+
+	</body>
+
+</html>
