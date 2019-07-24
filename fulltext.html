@@ -39,27 +39,31 @@
 				request.open("GET", "https://iiif.lib.harvard.edu/proxy/get/" + drs_id);
 				request.responsetype = 'document';
 				request.send();
-				// parser = new DOMParser();
-				// xmlDoc = parser.parseFromString(request.response,"text/xml");
-				return request.response;
-			};
+				request.onload = function() {
+					var resp = request.response
+					full_text.textContent = resp.querySelector('page')
+				}
+			}
 			// page_count = request_from_iiif_proxy(drs_id['page']['lastpage'])
-			// var request_result = request_from_iiif_proxy(drs_id);
+
+			request_from_iiif_proxy(drs_id);
 
 			// full_text.textContent = request_result
 
 
-			function request_txts_from_fds() {
-				var request = new XMLHttpRequest();
-				request.open("Get", "http://fds.lib.harvard.edu/fds/deliver/6098386?n=1&callback=?");
-				request.send();
-				return request;
-			};
+			// function request_txts_from_fds() {
+			// 	var request = new XMLHttpRequest();
+			// 	request.open("Get", "http://fds.lib.harvard.edu/fds/deliver/6098386");
+			// 	request.send();
+			// 	request.onload = function() {
+			// 		full_text.textContent = request.responseText;
+			// 	}
+			// }
 
-			var resp = request_txts_from_fds();
+			// request_txts_from_fds();
 			// resp = resp.toString()
 
-			full_text.textContent = resp.responseText;
+
 
 			// document.write(6,' ...writing 6');
 
