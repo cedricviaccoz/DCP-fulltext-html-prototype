@@ -26,8 +26,9 @@
 			const eg_page_id = 6098394; // for testing
 			const hasocr = false;
 
-			var full_text_dict = {}
+			var full_text_list = []
 			const full_text = document.querySelector('.full-text');
+			var text = '';
 
 			if (hasocr) {
 				document.getElementsByClassName('no-content')[0].style.display = "none";
@@ -44,9 +45,25 @@
 			// *************
 
 			function process_page_data(page_data) {
-				full_text_dict[page_data.responseURL] = page_data.response;
-
+				// full_text_dict[page_data.responseURL] = page_data.response;
+				full_text.textContent = (function () {
+					full_text_list.push(page_data.responseURL + page_data.response);
+					full_text_list = full_text_list.sort();
+					console.log(full_text_list.sort()[0]," ...first page url")
+					for (let i = 0; i < full_text_list.length; i++) {
+						text += full_text_list[i].slice(page_data.responseURL.length)
+					return text
+					}
+				})();
 			}
+
+
+			// IIFE
+			// (function () {
+			//     statements
+			// })();
+
+
 
 			function fds_handler() {
 			  if(this.status == 200) {
@@ -70,14 +87,14 @@
 					if (fileGrp.getAttribute("USE") == "text-plain") {
 						console.log("Plain text found on iteration ",g)
 						var txt_nodes = fileGrp.children // txt_nodes is an HTML Collection
-						console.log(txt_nodes," ...txt_nodes")
-						for (let i = 0; i < 3; i++) { // !!! REPLACE 3 WITH txt_nodes.length
+						console.log(txt_nodes.length," ...length of txt_nodes")
+						for (let i = 0; i < 30; i++) { // txt_nodes.length , or 3 for testing
 							var txt_node = txt_nodes[i];
 							var page_id = txt_node.firstElementChild.getAttribute("xlink:href");
 							console.log(page_id," ...page_id")
 							var request_txt = new XMLHttpRequest;
 							request_txt.onload = fds_handler;
-							request_txt.open("GET", "http://fds.lib.harvard.edu/fds/deliver/" + page_id + "?callback=" + (i+1));
+							request_txt.open("GET", "http://fds.lib.harvard.edu/fds/deliver/" + page_id);
 							request_txt.send();
 						}
 					}
@@ -100,16 +117,6 @@
 			request_xml.onload = xml_handler;
 			request_xml.open("GET", "http://fds.lib.harvard.edu/fds/deliver/" + drs_id);
 			request_xml.send();
-
-			// *******
-			var delayInMilliseconds = 5000; //1 second
-
-			setTimeout(function() {
-			  full_text.textContent = Object.values(full_text_dict).sort();
-			}, delayInMilliseconds);
-			// ******
-
-
 
 		</script>
 
