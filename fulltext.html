@@ -23,8 +23,10 @@
 
 		<script type="text/javascript">
 			const drs_id = 6622876;
+			const eg_page_id = 6098394; // for testing
 			const hasocr = false;
 
+			var full_text_dict = {}
 			const full_text = document.querySelector('.full-text');
 
 			if (hasocr) {
@@ -34,53 +36,78 @@
 			};
 			//const drs_id = <%document[:drs_id]%>
 
-			function request_from_iiif_proxy(drs_id) {
-				var request = new XMLHttpRequest();
-				request.open("GET", "https://iiif.lib.harvard.edu/proxy/get/" + drs_id);
-				request.responsetype = 'document';
-				request.send();
-				request.onload = function() {
-					var resp = request.response
-					full_text.textContent = resp.querySelector('page')
-				}
+			// *********
+			// const ordered = {};
+			// Object.keys(unordered).sort().forEach(function(key) {
+			//   ordered[key] = unordered[key];
+			// });
+			// *************
+
+			function fds_handler() {
+			  if(this.status == 200) {
+			    // success!
+					full_text_dict[this.requestURL] = this.response
+			  } else {
+			    // something went wrong
+			    console.log("\nThe server could not load the page text.");
+			  }
 			}
-			// page_count = request_from_iiif_proxy(drs_id['page']['lastpage'])
 
-			request_from_iiif_proxy(drs_id);
+			function extract_page_ids_from_xml(xml_DOM) {   //xml_DOM is a Document
 
-			// full_text.textContent = request_result
+				console.log(typeof xml_DOM,"...type of request.responseXML");
+				console.log(xml_DOM.documentElement.nodeName == "parsererror" ? "error while parsing" : xml_DOM.documentElement.nodeName,"...name of root element of request.responseXML");
+				var fileSec = xml_DOM.getElementsByTagName("fileSec")[0]; // fileSec is an Element
+				var fileGrps = fileSec.children; // fileGrps is an HTML Collection
+
+				for (let g = 0; g < fileGrps.length; g++) {
+					fileGrp = fileGrps[g];
+					if (fileGrp.getAttribute("USE") == "text-plain") {
+						console.log("Plain text found on iteration ",g)
+						var txt_nodes = fileGrp.children // txt_nodes is an HTML Collection
+						console.log(txt_nodes," ...txt_nodes")
+						for (let i = 0; i < 3; i++) { // !!! REPLACE 3 WITH txt_nodes.length
+							var txt_node = txt_nodes[i];
+							var page_id = txt_node.firstElementChild.getAttribute("xlink:href");
+							console.log(page_id," ...page_id")
+							var request_txt = new XMLHttpRequest;
+							request_txt.onload = fds_handler;
+							request_txt.open("GET", "http://fds.lib.harvard.edu/fds/deliver/" + page_id + "?callback=" + (i+1));
+							request_txt.send();
+						}
+					}
+				}
+
+				console.log(fileGrps.length," ... length of fileGrps");
+
+				// for each in txt_nodes:
 
 
-			// function request_txts_from_fds() {
-			// 	var request = new XMLHttpRequest();
-			// 	request.open("Get", "http://fds.lib.harvard.edu/fds/deliver/6098386");
-			// 	request.send();
-			// 	request.onload = function() {
-			// 		full_text.textContent = request.responseText;
-			// 	}
-			// }
-
-			// request_txts_from_fds();
-			// resp = resp.toString()
+				// console.log(txt_nodes.length,"...length of txt_nodes");
 
 
 
-			// document.write(6,' ...writing 6');
+				full_text.textContent = fileGrps;
 
-			function trimm(str, characters) {
-        var c_array = characters.split('');
-        var result  = '';
 
-        for (var i=0; i < characters.length; i++)
-          result += '\\' + c_array[i];
+			}
 
-        return str.replace(new RegExp('^[' + result + ']+|['+ result +']+$', 'g'), '');
-      }
+			function xml_handler() {
+			  if(this.status == 200 &&
+			    this.responseXML != null &&
+			    this.responseXML.documentElement.nodeName) {
+			    // success!
+			    extract_page_ids_from_xml(this.responseXML);
+			  } else {
+			    // something went wrong
+			    document.write("\nThe server could not load the page IDs. Please wait a moment and refresh the page.");
+			  }
+			}
 
-      // var text_string = "  (P<page><displaylabel>Pro;gress</displaylabel></page>);  ";
-      // text_string = trimm(request_result,"\n ;()");
-
-			// document.write(text_string);
+			var request_xml = new XMLHttpRequest();
+			request_xml.onload = xml_handler;
+			request_xml.open("GET", "http://fds.lib.harvard.edu/fds/deliver/" + drs_id);
+			request_xml.send();
 
 		</script>
 
