@@ -88,7 +88,7 @@
 						console.log("Plain text found on iteration ",g)
 						var txt_nodes = fileGrp.children // txt_nodes is an HTML Collection
 						console.log(txt_nodes.length," ...length of txt_nodes")
-						for (let i = 0; i < 30; i++) { // txt_nodes.length , or 3 for testing
+						for (let i = 0; i < 3; i++) { // txt_nodes.length , or 3 for testing
 							var txt_node = txt_nodes[i];
 							var page_id = txt_node.firstElementChild.getAttribute("xlink:href");
 							console.log(page_id," ...page_id")
