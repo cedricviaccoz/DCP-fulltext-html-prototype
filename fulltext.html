@@ -44,6 +44,56 @@
 			// });
 			// *************
 
+      // https://spring.io/guides/gs/consuming-rest-jquery/
+
+      function xml_handler() {
+        if(data.status == 200 &&
+          data.responseXML != null &&
+          data.responseXML.documentElement.nodeName) {
+          // success!
+          extract_page_ids_from_xml(data.responseXML);
+        } else {
+          // something went wrong
+          document.write("\nThe server could not load the page IDs. Please wait a moment and refresh the page.");
+        }
+      }
+
+      $(document).ready(function() {
+          $.ajax({
+              url: "http://fds.lib.harvard.edu/fds/deliver/" + drs_id
+          }).then(function(data) {
+    				console.log(typeof xml_DOM,"...type of request.responseXML");
+    				console.log(xml_DOM.documentElement.nodeName == "parsererror" ? "error while parsing" : xml_DOM.documentElement.nodeName,"...name of root element of request.responseXML");
+    				var fileSec = xml_DOM.getElementsByTagName("fileSec")[0]; // fileSec is an Element
+    				var fileGrps = fileSec.children; // fileGrps is an HTML Collection
+
+    				for (let g = 0; g < fileGrps.length; g++) {
+    					fileGrp = fileGrps[g];
+    					if (fileGrp.getAttribute("USE") == "text-plain") {
+    						console.log("Plain text found on iteration ",g)
+    						var txt_nodes = fileGrp.children // txt_nodes is an HTML Collection
+    						console.log(txt_nodes.length," ...length of txt_nodes")
+                var numbered_txt_nodes = {} // numbered_txt_nodes is an object (dictionary)
+                var pg = 1
+                for (let i = 0; i < 3; i++) { // txt_nodes.length , or 3 for testing
+    							var numbered_txt_nodes[pg] = txt_nodes[i];
+                  pg++
+    							var page_id = txt_node.firstElementChild.getAttribute("xlink:href");
+    							console.log(page_id," ...page_id")
+    							var request_txt = new XMLHttpRequest;
+
+            }
+
+            // $('.greeting-id').append(data.id);
+            // $('.greeting-content').append(data.content);
+          });
+      });
+
+
+
+
+
+
 			function process_page_data(page_data) {
 				// full_text_dict[page_data.responseURL] = page_data.response;
 				full_text.textContent = (function () {
@@ -101,22 +151,7 @@
 				}
 			}
 
-			function xml_handler() {
-			  if(this.status == 200 &&
-			    this.responseXML != null &&
-			    this.responseXML.documentElement.nodeName) {
-			    // success!
-			    extract_page_ids_from_xml(this.responseXML);
-			  } else {
-			    // something went wrong
-			    document.write("\nThe server could not load the page IDs. Please wait a moment and refresh the page.");
-			  }
-			}
 
-			var request_xml = new XMLHttpRequest();
-			request_xml.onload = xml_handler;
-			request_xml.open("GET", "http://fds.lib.harvard.edu/fds/deliver/" + drs_id);
-			request_xml.send();
 
 		</script>
 
