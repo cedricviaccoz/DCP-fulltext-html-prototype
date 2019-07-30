@@ -68,14 +68,13 @@
     						var txt_nodes = fileGrp.children // txt_nodes is an HTML Collection
     						console.log(txt_nodes.length," ...length of txt_nodes")
                 var numbered_txt_nodes = {} // numbered_txt_nodes is an object (dictionary)
-                var pg = 1
                 for (let i = 0; i < 3; i++) { // txt_nodes.length , or 3 for testing
-    							var numbered_txt_nodes[pg] = txt_nodes[i];
-                  pg++
-    							var page_id = txt_node.firstElementChild.getAttribute("xlink:href");
+    							var numbered_txt_nodes[i+1] = txt_nodes[i];
+                	var page_id = txt_node.firstElementChild.getAttribute("xlink:href");
     							console.log(page_id," ...page_id")
     							var request_txt = new XMLHttpRequest;
-
+                }
+              }
             }
 
             // $('.greeting-id').append(data.id);
