@@ -25,7 +25,7 @@
 
 		<script type="text/javascript">
 			const drs_id = 2678271; // TODO: feed this variable from url
-			const hasocr = false; // TODO: call hasocr endpoint for result
+			const hasocr = true; // TODO: call hasocr endpoint for result
 
 			var full_text_list = []
 			const full_text = document.querySelector('.full-text');
@@ -42,7 +42,7 @@
             add_text();
           });
         });
-			} else {
+  		} else {
 				document.getElementsByClassName('no-content')[0].style.display = "block";
 			};
 
@@ -72,7 +72,7 @@
 
       function add_text() {
         var page_divs = document.getElementById("fulltext-zone").children;
-        for (let i = 0; i < page_divs.length; i++) { // replace 3 with page_divs.length
+        for (let i = 0; i < 10; i++) { // replace testing number with page_divs.length
           // console.log(page_divs[i].getAttribute("drs_id"))
           $.ajax({
             url: "http://fds.lib.harvard.edu/fds/deliver/" + page_divs[i].getAttribute("drs_id")
