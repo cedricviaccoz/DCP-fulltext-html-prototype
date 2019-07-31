@@ -15,15 +15,17 @@
 			This document currently holds no OCR text to be downloaded.
 		</div>
 
-		<div class="progress-bar">
-			progress bar TODO
-		</div>
+    <div id="progress">
+
+    </div>
 
     <div id="fulltext-zone">
 
     </div>
 
 		<script type="text/javascript">
+      // some drs IDs to test with: 2678271 (45 pages); 6612363 (84 pages); 52666264 (120 pages); 9752507 (900 pages)
+
 			const drs_id = 2678271; // TODO: feed this variable from url
 			const hasocr = true; // TODO: call hasocr endpoint for result
 
@@ -45,7 +47,6 @@
   		} else {
 				document.getElementsByClassName('no-content')[0].style.display = "block";
 			};
-
 
       function process_xml(xml_DOM) {
         console.log(typeof xml_DOM,"...type of request.responseXML");
@@ -72,54 +73,21 @@
 
       function add_text() {
         var page_divs = document.getElementById("fulltext-zone").children;
-        for (let i = 0; i < 10; i++) { // replace testing number with page_divs.length
+        for (let i = 0; i < page_divs.length; i++) { // replace testing number with page_divs.length
           // console.log(page_divs[i].getAttribute("drs_id"))
           $.ajax({
             url: "http://fds.lib.harvard.edu/fds/deliver/" + page_divs[i].getAttribute("drs_id")
           }).then(function(data) {
-            console.log(data)
-            console.log(typeof page_divs)
+            console.log(data);
+            console.log(typeof page_divs);
             page_divs[i].innerText = data;
+            // page_divs[i].innerText = page_divs[i].getAttribute('id');
+            // page_divs[i].innerText = "[PAGE " + String(i+1) "] " + data.responseText;
           });
         }
       }
 
-      function updateBar(currentPage, totalPage) {
-    	  let bar = document.getElementById("bar");
-    	  let width = (currentPage/totalPage) * 100;
-          bar.style.width = width + '%';
-          let loadText = document.getElementById("loading-text");
-          loadText.innerText = "Loading full text ("+ String(currentPage)+" of "+String(totalPage)+" pages)"
-    	}
-
     </script>
-
-    <style type="text/css">
-    #progress {
-    	width: 100%;
-    	height: 40px;
-    	background-color: white;
-    	position: relative;
-    	border: solid;
-    }
-
-    #bar {
-    	width: 1%;
-    	height: 40px;
-    	background-color: silver;
-    }
-
-    #loading-text {
-    	position: absolute;
-    	top: 10px;
-    	height: 20px;
-    	font-family: "Trueno", Helvetica, Roboto, Arial, sans-serif;
-    	text-align: center;
-    	width: 100%;
-    	z-index: 10;
-    }
-
-    </style>
 
 	</body>
 
