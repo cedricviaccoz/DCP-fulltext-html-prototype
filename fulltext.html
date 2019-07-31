@@ -6,7 +6,6 @@
     <title>Download full text</title>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-    <script src="hello.js"></script>
 
   </head>
 
@@ -20,12 +19,12 @@
 			progress bar TODO
 		</div>
 
-		<div class="full-text">
-			full text TODO
-		</div>
+    <div id="fulltext-zone">
+
+    </div>
 
 		<script type="text/javascript">
-			const drs_id = 6622876;
+			const drs_id = 2678271;
 			const eg_page_id = 6098394; // for testing
 			const hasocr = false;
 
@@ -43,121 +42,161 @@
 
       // https://spring.io/guides/gs/consuming-rest-jquery/
 
-      function xml_handler() {
-        if(data.status == 200 &&
-          data.responseXML != null &&
-          data.responseXML.documentElement.nodeName) {
-          // success!
-          extract_page_ids_from_xml(data.responseXML);
-        } else {
-          // something went wrong
-          document.write("\nThe server could not load the page IDs. Please wait a moment and refresh the page.");
+      // function xml_handler() {
+      //   if(data.status == 200 &&
+      //     data.responseXML != null &&
+      //     data.responseXML.documentElement.nodeName) {
+      //     // success!
+      //     extract_page_ids_from_xml(data.responseXML);
+      //   } else {
+      //     // something went wrong
+      //     document.write("\nThe server could not load the page IDs. Please wait a moment and refresh the page.");
+      //   }
+      // }
+
+      // function sort_loaded_pages(pages){
+      //   var by_number = function(a, b) {
+      //       return a.attr("id").localeCompare(b.attr("id"));
+      //   }
+      //
+      //   return pages.sort(by_number);
+      //   // let textZone = document.getElementById('fulltext-zone');
+    	// 	// let newDiv = document.createElement('div');
+    	// 	// newDiv.setAttribute("id", pageNumber;
+    	// 	// newDiv.innerText += textToAppend;
+    	// 	// textZone.appendChild(newDiv);
+    	// }
+
+      function process_xml(xml_DOM) {
+        console.log(typeof xml_DOM,"...type of request.responseXML");
+        console.log(xml_DOM.documentElement.nodeName == "parsererror" ? "error while parsing" : xml_DOM.documentElement.nodeName,"...name of root element of request.responseXML");
+        var fileSec = xml_DOM.getElementsByTagName("fileSec")[0]; // fileSec is an Element
+        var fileGrps = fileSec.children; // fileGrps is an HTML Collection
+
+        for (let g = 0; g < fileGrps.length; g++) {
+          fileGrp = fileGrps[g];
+          if (fileGrp.getAttribute("USE") == "text-plain") {
+            console.log("Plain text found on iteration ",g);
+            let txt_nodes = fileGrp.children; // txt_nodes is an HTML Collection
+            console.log(txt_nodes.length," ...length of txt_nodes");
+            for (let i = 0; i < txt_nodes.length; i++) { // txt_nodes.length , or 3 for testing
+              let textZone = document.getElementById('fulltext-zone');
+          		let newDiv = document.createElement('div');
+          		newDiv.setAttribute("id", i+1);
+              newDiv.setAttribute("drs_id", txt_nodes[i].firstElementChild.getAttribute("xlink:href"))
+              textZone.appendChild(newDiv);
+            }
+          }
         }
       }
 
-      function updateTextZone(textToAppend, currIndex){
-    		let textZone = document.getElementById('fulltext-zone');
-    		let newDiv = document.createElement('div');
-    		newDiv.setAttribute("id", ("fulltext-part-"+String(currIndex-pageIncrementValue)+"-to-"+String(currIndex)));
-    		newDiv.innerText += textToAppend;
-    		textZone.appendChild(newDiv);
-    	}
+      function add_text() {
+        var page_divs = document.getElementById("fulltext-zone").children;
+        for (let i = 0; i < page_divs.length; i++) { // replace 3 with page_divs.length
+          // console.log(page_divs[i].getAttribute("drs_id"))
+          $.ajax({
+            url: "http://fds.lib.harvard.edu/fds/deliver/" + page_divs[i].getAttribute("drs_id")
+          }).then(function(data) {
+            console.log(data)
+            console.log(typeof page_divs)
+            page_divs[i].innerText = data;
+          });
+        }
+
+        // var request_txt = new XMLHttpRequest;
+        // request_txt.onload = fds_handler;
+        // request_txt.open("GET", "http://fds.lib.harvard.edu/fds/deliver/" + page_id);
+        // request_txt.send();
+
+      }
 
       $(document).ready(function() {
-          $.ajax({
-              url: "http://fds.lib.harvard.edu/fds/deliver/" + drs_id
-          }).then(function(xml_DOM) {
-    				console.log(typeof xml_DOM,"...type of request.responseXML");
-    				console.log(xml_DOM.documentElement.nodeName == "parsererror" ? "error while parsing" : xml_DOM.documentElement.nodeName,"...name of root element of request.responseXML");
-    				var fileSec = xml_DOM.getElementsByTagName("fileSec")[0]; // fileSec is an Element
-    				var fileGrps = fileSec.children; // fileGrps is an HTML Collection
+        $.ajax({
+          url: "http://fds.lib.harvard.edu/fds/deliver/" + drs_id
+        }).then(function(xml_DOM) {
+          process_xml(xml_DOM)
+        }).then(function() {
+          add_text();
+          // var pages = []; // pages is an array (list) of objects (dictionaries)
+          // for (let i = 0; i < 10; i++) { // txt_nodes.length , or 3 for testing
+          //   // var request_txt = new XMLHttpRequest;
+          //   pages.push(
+          //     { "number" : i+1 ,
+                // "id" : txt_nodes[i].firstElementChild.getAttribute("xlink:href") ,
+          //       "text" : "text here for page" + (i+1)
+          //     }
+          //   );
+          // sort_loaded_pages(pages);
+          // }
+        });
 
-    				for (let g = 0; g < fileGrps.length; g++) {
-    					fileGrp = fileGrps[g];
-    					if (fileGrp.getAttribute("USE") == "text-plain") {
-    						console.log("Plain text found on iteration ",g);
-    						var txt_nodes = fileGrp.children; // txt_nodes is an HTML Collection
-    						console.log(txt_nodes.length," ...length of txt_nodes");
-                var pages = []; // pages is an array (list) of objects (dictionaries)
-                for (let i = 0; i < 3; i++) { // txt_nodes.length , or 3 for testing
-                  var page = {};
-                  // var request_txt = new XMLHttpRequest;
-                  pages.push(
-                    { "number" : i+1 ,
-                      "id" : txt_nodes[i].firstElementChild.getAttribute("xlink:href") ,
-                      "text" : "text here for page" + (i+1)
-                    }
-                  );
-                }
-              }
-            }
 
-            $('.full-text').append(pages[2]["text"]);
+            // $('.full-text').append(pages[2]["text"]);
             // $('.greeting-content').append(data.content);
-          });
+
       });
 
-
-
-
-
-
-			function process_page_data(page_data) {
-				// full_text_dict[page_data.responseURL] = page_data.response;
-				full_text.textContent = (function () {
-					full_text_list.push(page_data.responseURL + page_data.response);
-					full_text_list = full_text_list.sort();
-					console.log(full_text_list.sort()[0]," ...first page url")
-					for (let i = 0; i < full_text_list.length; i++) {
-						text += full_text_list[i].slice(page_data.responseURL.length)
-					return text
-					}
-				})();
-			}
-
-
-			// IIFE
-			// (function () {
-			//     statements
-			// })();
-
-
-
-			function fds_handler() {
-			  if(this.status == 200) {
-			    // success!
-					process_page_data(this)
-			  } else {
-			    // something went wrong
-			    console.log("\nThe server could not load the page text.");
-			  }
-			}
-
-			function extract_page_ids_from_xml(xml_DOM) {   //xml_DOM is a Document
-
-				console.log(typeof xml_DOM,"...type of request.responseXML");
-				console.log(xml_DOM.documentElement.nodeName == "parsererror" ? "error while parsing" : xml_DOM.documentElement.nodeName,"...name of root element of request.responseXML");
-				var fileSec = xml_DOM.getElementsByTagName("fileSec")[0]; // fileSec is an Element
-				var fileGrps = fileSec.children; // fileGrps is an HTML Collection
-
-				for (let g = 0; g < fileGrps.length; g++) {
-					fileGrp = fileGrps[g];
-					if (fileGrp.getAttribute("USE") == "text-plain") {
-						console.log("Plain text found on iteration ",g)
-						var txt_nodes = fileGrp.children // txt_nodes is an HTML Collection
-						console.log(txt_nodes.length," ...length of txt_nodes")
-						for (let i = 0; i < 3; i++) { // txt_nodes.length , or 3 for testing
-							var txt_node = txt_nodes[i];
-							var page_id = txt_node.firstElementChild.getAttribute("xlink:href");
-							console.log(page_id," ...page_id")
-							var request_txt = new XMLHttpRequest;
-							request_txt.onload = fds_handler;
-							request_txt.open("GET", "http://fds.lib.harvard.edu/fds/deliver/" + page_id);
-							request_txt.send();
-						}
-					}
-				}
-			}
+      //
+      //
+      //
+      //
+      //
+			// function process_page_data(page_data) {
+			// 	// full_text_dict[page_data.responseURL] = page_data.response;
+			// 	full_text.textContent = (function () {
+			// 		full_text_list.push(page_data.responseURL + page_data.response);
+			// 		full_text_list = full_text_list.sort();
+			// 		console.log(full_text_list.sort()[0]," ...first page url")
+			// 		for (let i = 0; i < full_text_list.length; i++) {
+			// 			text += full_text_list[i].slice(page_data.responseURL.length)
+			// 		return text
+			// 		}
+			// 	})();
+			// }
+      //
+      //
+			// // IIFE
+			// // (function () {
+			// //     statements
+			// // })();
+      //
+      //
+      //
+			// function fds_handler() {
+			//   if(this.status == 200) {
+			//     // success!
+			// 		process_page_data(this)
+			//   } else {
+			//     // something went wrong
+			//     console.log("\nThe server could not load the page text.");
+			//   }
+			// }
+      //
+			// function extract_page_ids_from_xml(xml_DOM) {   //xml_DOM is a Document
+      //
+			// 	console.log(typeof xml_DOM,"...type of request.responseXML");
+			// 	console.log(xml_DOM.documentElement.nodeName == "parsererror" ? "error while parsing" : xml_DOM.documentElement.nodeName,"...name of root element of request.responseXML");
+			// 	var fileSec = xml_DOM.getElementsByTagName("fileSec")[0]; // fileSec is an Element
+			// 	var fileGrps = fileSec.children; // fileGrps is an HTML Collection
+      //
+			// 	for (let g = 0; g < fileGrps.length; g++) {
+			// 		fileGrp = fileGrps[g];
+			// 		if (fileGrp.getAttribute("USE") == "text-plain") {
+			// 			console.log("Plain text found on iteration ",g)
+			// 			var txt_nodes = fileGrp.children // txt_nodes is an HTML Collection
+			// 			console.log(txt_nodes.length," ...length of txt_nodes")
+			// 			for (let i = 0; i < 3; i++) { // txt_nodes.length , or 3 for testing
+			// 				var txt_node = txt_nodes[i];
+			// 				var page_id = txt_node.firstElementChild.getAttribute("xlink:href");
+			// 				console.log(page_id," ...page_id")
+			// 				var request_txt = new XMLHttpRequest;
+			// 				request_txt.onload = fds_handler;
+			// 				request_txt.open("GET", "http://fds.lib.harvard.edu/fds/deliver/" + page_id);
+			// 				request_txt.send();
+			// 			}
+			// 		}
+			// 	}
+			// }
 
 
 
