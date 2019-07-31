@@ -5,6 +5,9 @@
 
     <title>Download full text</title>
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="hello.js"></script>
+
   </head>
 
   <body>
@@ -55,7 +58,7 @@
       $(document).ready(function() {
           $.ajax({
               url: "http://fds.lib.harvard.edu/fds/deliver/" + drs_id
-          }).then(function(data) {
+          }).then(function(xml_DOM) {
     				console.log(typeof xml_DOM,"...type of request.responseXML");
     				console.log(xml_DOM.documentElement.nodeName == "parsererror" ? "error while parsing" : xml_DOM.documentElement.nodeName,"...name of root element of request.responseXML");
     				var fileSec = xml_DOM.getElementsByTagName("fileSec")[0]; // fileSec is an Element
@@ -64,20 +67,24 @@
     				for (let g = 0; g < fileGrps.length; g++) {
     					fileGrp = fileGrps[g];
     					if (fileGrp.getAttribute("USE") == "text-plain") {
-    						console.log("Plain text found on iteration ",g)
-    						var txt_nodes = fileGrp.children // txt_nodes is an HTML Collection
-    						console.log(txt_nodes.length," ...length of txt_nodes")
-                var numbered_txt_nodes = {} // numbered_txt_nodes is an object (dictionary)
+    						console.log("Plain text found on iteration ",g);
+    						var txt_nodes = fileGrp.children; // txt_nodes is an HTML Collection
+    						console.log(txt_nodes.length," ...length of txt_nodes");
+                var pages = []; // pages is an array (list) of objects (dictionaries)
                 for (let i = 0; i < 3; i++) { // txt_nodes.length , or 3 for testing
-    							var numbered_txt_nodes[i+1] = txt_nodes[i];
-                	var page_id = txt_node.firstElementChild.getAttribute("xlink:href");
-    							console.log(page_id," ...page_id")
-    							var request_txt = new XMLHttpRequest;
+                  var page = {};
+                  // var request_txt = new XMLHttpRequest;
+                  pages.push(
+                    { "number" : i+1 ,
+                      "id" : txt_nodes[i].firstElementChild.getAttribute("xlink:href") ,
+                      "text" : "text here for page" + (i+1)
+                    }
+                  );
                 }
               }
             }
 
-            // $('.greeting-id').append(data.id);
+            $('.full-text').append(pages[2]["text"]);
             // $('.greeting-content').append(data.content);
           });
       });
