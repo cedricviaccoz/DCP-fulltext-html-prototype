@@ -55,6 +55,14 @@
         }
       }
 
+      function updateTextZone(textToAppend, currIndex){
+    		let textZone = document.getElementById('fulltext-zone');
+    		let newDiv = document.createElement('div');
+    		newDiv.setAttribute("id", ("fulltext-part-"+String(currIndex-pageIncrementValue)+"-to-"+String(currIndex)));
+    		newDiv.innerText += textToAppend;
+    		textZone.appendChild(newDiv);
+    	}
+
       $(document).ready(function() {
           $.ajax({
               url: "http://fds.lib.harvard.edu/fds/deliver/" + drs_id
