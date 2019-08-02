@@ -38,7 +38,7 @@
 		<script type="text/javascript">
       // some drs IDs to test with: 2678271 (45 pages); 6612363 (84 pages); 52666264 (120 pages); 9752507 (900 pages)
 
-			const drs_id = 9752507; // TODO: feed this variable from url
+			const drs_id = 6612363; // TODO: feed this variable from url
 
 			document.getElementsByClassName('no-content')[0].style.display = "none";
       $(document).ready(function() {
@@ -78,7 +78,7 @@
     	  let width = (currentPage/totalPage) * 100;
           bar.style.width = width + '%';
           let loadText = document.getElementById("loading-text");
-          loadText.innerText = "Loading full text ("+ String(currentPage)+" of "+String(totalPage)+" pages)"
+          loadText.innerText = "Loading ("+ String(currentPage)+" of "+String(totalPage)+" pages)"
     	}
 
       function retrieveOCRAJAX(i, progressionIndex, page_divs) {
@@ -95,7 +95,7 @@
             },
             statusCode: {
               500: function() {setTimeout( function () {retrieveOCRAJAX(i, progressionIndex, page_divs);}, 5000);}
-              }   
+              }
           });
       }
 
