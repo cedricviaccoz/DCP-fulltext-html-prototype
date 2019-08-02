@@ -38,7 +38,7 @@
 		<script type="text/javascript">
       // some drs IDs to test with: 2678271 (45 pages); 6612363 (84 pages); 52666264 (120 pages); 9752507 (900 pages)
 
-			const drs_id = 2678271; // TODO: feed this variable from url
+			const drs_id = 9752507; // TODO: feed this variable from url
 
 			document.getElementsByClassName('no-content')[0].style.display = "none";
       $(document).ready(function() {
@@ -81,19 +81,32 @@
           loadText.innerText = "Loading full text ("+ String(currentPage)+" of "+String(totalPage)+" pages)"
     	}
 
+      function retrieveOCRAJAX(i, progressionIndex, page_divs) {
+        $.ajax({
+            url: "http://fds.lib.harvard.edu/fds/deliver/" + page_divs[i].getAttribute("drs_id"),
+            success: function(data) {
+              progressionIndex.idx++;
+              page_divs[i].innerText = data;
+              updateBar(progressionIndex.idx, page_divs.length);
+              // page_divs[i].innerText = page_divs[i].getAttribute('id');
+            },
+            error: function(xhr, status, error) {
+              console.log('at div : '+ String(i));
+            },
+            statusCode: {
+              500: function() {setTimeout( function () {retrieveOCRAJAX(i, progressionIndex, page_divs);}, 5000);}
+              }   
+          });
+      }
+
 
       function add_text() {
         var page_divs = document.getElementById("fulltext-zone").children;
-        let progressionIndex = 0;
+        let progressionIndex = {
+          idx: 0
+        };
         for (let i = 0; i < page_divs.length; i++) { // replace testing number with page_divs.length
-          $.ajax({
-            url: "http://fds.lib.harvard.edu/fds/deliver/" + page_divs[i].getAttribute("drs_id")
-          }).then(function(data) {
-            progressionIndex++;
-            page_divs[i].innerText = data;
-            updateBar(progressionIndex, page_divs.length)
-            // page_divs[i].innerText = page_divs[i].getAttribute('id');
-          });
+          retrieveOCRAJAX(i, progressionIndex, page_divs);
         }
       }
 
