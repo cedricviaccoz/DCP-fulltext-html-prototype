@@ -41,9 +41,17 @@
 			const drs_id = 9752507; // TODO: feed this variable from url
 
 			document.getElementsByClassName('no-content')[0].style.display = "none";
+
       $(document).ready(function() {
+        retrieve_XML();
+      });
+
+      function retrieve_XML() {
         $.ajax({
-          url: "http://fds.lib.harvard.edu/fds/deliver/" + drs_id
+          url: "http://fds.lib.harvard.edu/fds/deliver/" + drs_id,
+          statusCode: {
+            500: function() {setTimeout( function () {retrieve_XML();}, 5000);}
+            }
         }).then(function(xml_DOM) {
           process_xml(xml_DOM)
           add_title(xml_DOM)
@@ -52,7 +60,7 @@
         }).then(function() {
           make_text_file();
         });
-      });
+      }
 
       function process_xml(xml_DOM) {
         var fileSec = xml_DOM.getElementsByTagName("fileSec")[0]; // fileSec is an Element
@@ -81,6 +89,18 @@
           loadText.innerText = "Loading full text ("+ String(currentPage)+" of "+String(totalPage)+" pages)"
     	}
 
+
+      function add_text() {
+        var page_divs = document.getElementById("fulltext-zone").children;
+        let progressionIndex = {
+          idx: 0
+        };
+        for (let i = 0; i < page_divs.length; i++) { // replace testing number with page_divs.length
+          retrieveOCRAJAX(i, progressionIndex, page_divs);
+        }
+      }
+
+
       function retrieveOCRAJAX(i, progressionIndex, page_divs) {
         $.ajax({
             url: "http://fds.lib.harvard.edu/fds/deliver/" + page_divs[i].getAttribute("drs_id"),
@@ -95,20 +115,10 @@
             },
             statusCode: {
               500: function() {setTimeout( function () {retrieveOCRAJAX(i, progressionIndex, page_divs);}, 5000);}
-              }   
+              }
           });
       }
 
-
-      function add_text() {
-        var page_divs = document.getElementById("fulltext-zone").children;
-        let progressionIndex = {
-          idx: 0
-        };
-        for (let i = 0; i < page_divs.length; i++) { // replace testing number with page_divs.length
-          retrieveOCRAJAX(i, progressionIndex, page_divs);
-        }
-      }
 
       function add_title(xml_DOM) {
         var title_div = document.getElementById("display_label")
