@@ -49,9 +49,7 @@
           add_title(xml_DOM)
         }).then(function() {
           add_text();
-        }).then(function() {
-          make_text_file();
-        });
+        })
       });
 
       function process_xml(xml_DOM) {
@@ -89,7 +87,8 @@
               page_divs[i].innerText = data;
               updateBar(progressionIndex.idx, page_divs.length);
               if(progressionIndex.idx == page_divs.length - 1){
-                $('#download').show();
+                $('#download').show({easing: 'swing'});
+                $('#progress').hide({easing: 'swing'});
               }
             },
             error: function(xhr, status, error) {
