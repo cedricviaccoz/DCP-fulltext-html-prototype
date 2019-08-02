@@ -50,36 +50,14 @@
 				document.getElementsByClassName('no-content')[0].style.display = "block";
 			};
 
-      $( "#download" ).click(function() {
-        // function download(data, filename, type) {
-        var file = new Blob([data], {type: type});
-        if (window.navigator.msSaveOrOpenBlob) // IE10+
-          window.navigator.msSaveOrOpenBlob(file, filename);
-        else { // Others
-          var a = document.createElement("a"),
-            url = URL.createObjectURL(file);
-          a.href = url;
-          a.download = filename;
-          document.body.appendChild(a);
-          a.click();
-          setTimeout(function() {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-          }, 0);
-        }
-      }
-
-      });
-
       function make_text_file() {
         var text = [];
         var page_divs = document.getElementById("fulltext-zone").children;
         for (let i= 0; i < page_divs.length; i++) {
           text += page_divs[i].textContent
-        }.then()
-
-        var file = new Blob([text],{type:"text/plain"})
-
+        }
+        $("#download").href = URL.createObjectURL(new Blob([text],{type:"text/plain"}));
+        $("#download").download = String(drs_id) + ".txt";
       }
 
       function process_xml(xml_DOM) {
