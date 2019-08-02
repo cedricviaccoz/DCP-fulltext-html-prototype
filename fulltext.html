@@ -1,23 +1,112 @@
-<div id="no-content"> This document currently holds no OCR text to be downloaded. 
-</div>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
 
-<div id="progress-bar">
-	TODO
-</div>
+    <title>Download full text</title>
 
-<div id="fulltext-zone">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 
-</div>
+  </head>
 
-<script type="text/javascript">
-	const drs_id = 2585728;
-	const hasocr = false;
+  <body>
 
-	//const drs_id = <%document[:drs_id]%>
+		<div class="no-content">
+			This document currently holds no OCR text to be downloaded.
+		</div>
 
-	if(hasocr){
-		document.getElementById('no-content').style.display = "none";
-	}else{
-		document.getElementById('no-content').style.display = "block";
-	}
-</script>
+    <div id="title_box">
+      <div id="field_name">
+        Full text of
+      </div>
+      <div id="display_label"></div>
+    </div>
+
+    <div id="progress">
+
+    </div>
+
+    <div id="download">
+      DOWNLOAD
+    </div>
+
+    <div id="fulltext-zone">
+
+    </div>
+
+		<script type="text/javascript">
+      // some drs IDs to test with: 2678271 (45 pages); 6612363 (84 pages); 52666264 (120 pages); 9752507 (900 pages)
+
+			const drs_id = 2678271; // TODO: feed this variable from url
+			const hasocr = true; // TODO: call hasocr endpoint for result
+
+			if (hasocr) {
+				document.getElementsByClassName('no-content')[0].style.display = "none";
+        $(document).ready(function() {
+          $.ajax({
+            url: "http://fds.lib.harvard.edu/fds/deliver/" + drs_id
+          }).then(function(xml_DOM) {
+            process_xml(xml_DOM)
+            add_title(xml_DOM)
+          }).then(function() {
+            add_text();
+          }).then(function() {
+            make_text_file();
+          });
+        });
+  		} else {
+				document.getElementsByClassName('no-content')[0].style.display = "block";
+			};
+
+      function process_xml(xml_DOM) {
+        var fileSec = xml_DOM.getElementsByTagName("fileSec")[0]; // fileSec is an Element
+        var fileGrps = fileSec.children; // fileGrps is an HTML Collection
+
+        for (let g = 0; g < fileGrps.length; g++) {
+          fileGrp = fileGrps[g];
+          if (fileGrp.getAttribute("USE") == "text-plain") {
+            let txt_nodes = fileGrp.children; // txt_nodes is an HTML Collection
+            for (let i = 0; i < txt_nodes.length; i++) { // txt_nodes.length , or 3 for testing
+              let textZone = document.getElementById('fulltext-zone');
+          		let newDiv = document.createElement('div');
+          		newDiv.setAttribute("id", i+1);
+              newDiv.setAttribute("drs_id", txt_nodes[i].firstElementChild.getAttribute("xlink:href"))
+              textZone.appendChild(newDiv);
+            }
+          }
+        }
+      }
+
+      function add_text() {
+        var page_divs = document.getElementById("fulltext-zone").children;
+        for (let i = 0; i < page_divs.length; i++) { // replace testing number with page_divs.length
+          $.ajax({
+            url: "http://fds.lib.harvard.edu/fds/deliver/" + page_divs[i].getAttribute("drs_id")
+          }).then(function(data) {
+            page_divs[i].innerText = data;
+            // page_divs[i].innerText = page_divs[i].getAttribute('id');
+          });
+        }
+      }
+
+      function add_title(xml_DOM) {
+        var title_div = document.getElementById("display_label")
+        var title = xml_DOM.getElementsByTagName("mets")[0].getAttribute("LABEL")
+        title_div.innerText = title
+      }
+
+      // function make_text_file() {
+      //   var text = [];
+      //   var page_divs = document.getElementById("fulltext-zone").children;
+      //   for (let i= 0; i < page_divs.length; i++) {
+      //     text += page_divs[i].textContent
+      //   }
+      //   $("#download").href = URL.createObjectURL(new Blob([text],{type:"text/plain"}));
+      //   $("#download").download = String(drs_id) + ".txt";
+      // }
+
+    </script>
+
+	</body>
+
+</html>
