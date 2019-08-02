@@ -27,9 +27,8 @@
       <div id="loading-text">Retrieving item metadata, please wait...</div>
     </div>
 
-    <div id="download">
-      DOWNLOAD
-    </div>
+    <button id="download" onclick="triggerFullTextDownload()">DOWNLOAD
+    </button>
 
     <div id="fulltext-zone">
 
@@ -38,7 +37,8 @@
 		<script type="text/javascript">
       // some drs IDs to test with: 2678271 (45 pages); 6612363 (84 pages); 52666264 (120 pages); 9752507 (900 pages)
 
-			const drs_id = 9752507; // TODO: feed this variable from url
+			const drs_id = 2678271; // TODO: feed this variable from url
+      $('#download').hide();
 
 			document.getElementsByClassName('no-content')[0].style.display = "none";
       $(document).ready(function() {
@@ -88,7 +88,9 @@
               progressionIndex.idx++;
               page_divs[i].innerText = data;
               updateBar(progressionIndex.idx, page_divs.length);
-              // page_divs[i].innerText = page_divs[i].getAttribute('id');
+              if(progressionIndex.idx == page_divs.length - 1){
+                $('#download').show();
+              }
             },
             error: function(xhr, status, error) {
               console.log('at div : '+ String(i));
@@ -116,15 +118,33 @@
         title_div.innerText = title
       }
 
-      // function make_text_file() {
-      //   var text = [];
-      //   var page_divs = document.getElementById("fulltext-zone").children;
-      //   for (let i= 0; i < page_divs.length; i++) {
-      //     text += page_divs[i].textContent
-      //   }
-      //   $("#download").href = URL.createObjectURL(new Blob([text],{type:"text/plain"}));
-      //   $("#download").download = String(drs_id) + ".txt";
-      // }
+      function triggerFullTextDownload(){
+        download(String(drs_id) + ".txt", make_text_file());
+      }
+
+      function make_text_file() {
+        var text = [];
+        var page_divs = document.getElementById("fulltext-zone").children;
+        for (let i= 0; i < page_divs.length; i++) {
+          text += page_divs[i].textContent
+        }
+        return text;
+      } 
+
+
+      function download(filename, text) {
+        var element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+        element.setAttribute('download', filename);
+
+        element.style.display = 'none';
+        document.body.appendChild(element);
+
+        element.click();
+
+        document.body.removeChild(element);
+      }
+
 
     </script>
 
