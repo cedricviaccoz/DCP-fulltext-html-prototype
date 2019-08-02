@@ -15,6 +15,13 @@
 			This document currently holds no OCR text to be downloaded.
 		</div>
 
+    <div id="title_box">
+      <div id="field_name">
+        Full text of
+      </div>
+      <div id="display_label"></div>
+    </div>
+
     <div id="progress">
 
     </div>
@@ -40,6 +47,7 @@
             url: "http://fds.lib.harvard.edu/fds/deliver/" + drs_id
           }).then(function(xml_DOM) {
             process_xml(xml_DOM)
+            add_title(xml_DOM)
           }).then(function() {
             add_text();
           }).then(function() {
@@ -49,16 +57,6 @@
   		} else {
 				document.getElementsByClassName('no-content')[0].style.display = "block";
 			};
-
-      function make_text_file() {
-        var text = [];
-        var page_divs = document.getElementById("fulltext-zone").children;
-        for (let i= 0; i < page_divs.length; i++) {
-          text += page_divs[i].textContent
-        }
-        $("#download").href = URL.createObjectURL(new Blob([text],{type:"text/plain"}));
-        $("#download").download = String(drs_id) + ".txt";
-      }
 
       function process_xml(xml_DOM) {
         var fileSec = xml_DOM.getElementsByTagName("fileSec")[0]; // fileSec is an Element
@@ -90,6 +88,22 @@
           });
         }
       }
+
+      function add_title(xml_DOM) {
+        var title_div = document.getElementById("display_label")
+        var title = xml_DOM.getElementsByTagName("mets")[0].getAttribute("LABEL")
+        title_div.innerText = title
+      }
+
+      // function make_text_file() {
+      //   var text = [];
+      //   var page_divs = document.getElementById("fulltext-zone").children;
+      //   for (let i= 0; i < page_divs.length; i++) {
+      //     text += page_divs[i].textContent
+      //   }
+      //   $("#download").href = URL.createObjectURL(new Blob([text],{type:"text/plain"}));
+      //   $("#download").download = String(drs_id) + ".txt";
+      // }
 
     </script>
 
